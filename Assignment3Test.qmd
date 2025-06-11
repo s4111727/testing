@@ -3,9 +3,13 @@ title: "Australia's Growing Love Affair with Japanese Snow"
 author: "Eunice Tse (s4111727)"
 format:
   revealjs:
+    self-contained: true
     theme: simple
     css: styles.css
-editor: visual
+    transition: none
+
+filters:
+  - _extensions/fix-plotly-size/filters/fix-plotly-size.lua
 ---
 
 ```{r setup, include=FALSE}
@@ -29,7 +33,7 @@ Photographer: Noriko Hayashi
 
 ### A Rising Proportion of Australians Embracing Japan's Winter
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, out.width="100%"}
 destinations <- read.csv("destinations_clean.csv")
 destinations$Month <- factor(destinations$Month,
                              levels=c("Jan", "Feb", "Mar", "Apr", "May", "Jun",
@@ -42,7 +46,8 @@ plot_ly(destinations, x=~Month, y=~Japan_Ratio*100, frame=~Year,
          xaxis=list(title=list(text="Month"), zeroline=FALSE),
          yaxis=list(title=list(text="Share of Outbound Australians (%)"),
                     zeroline=FALSE)) %>%
-  animation_opts(frame=400, transition=100, redraw=TRUE, mode="immediate") 
+  animation_opts(frame=400, transition=100, redraw=TRUE, mode="immediate") %>%
+  config(responsive=TRUE)
 ```
 
 ::: {style="text-align: right; font-size: 60%;"}
@@ -57,7 +62,7 @@ Data source: Japan National Tourism Organization (2024)
 
 ### 6x More Australians Ski Japan Than The Global Tourist Average
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, out.width="100%"}
 reasons <- read.csv("reasons_clean.csv")
 reasons$Activity <- factor(reasons$Activity)
 plot_ly(reasons, x=~Activity, y=~All, type="bar", name="All countries",
@@ -137,7 +142,6 @@ ggplot(weather, aes(x=location, y=value, fill=hemisphere)) +
   theme_bw() +
   theme(legend.position="none", panel.grid.major.x=element_blank(),
         strip.placement="outside", strip.background=element_blank())
-
 ```
 
 ::: {style="text-align: right; font-size: 60%;"}
@@ -155,7 +159,7 @@ Data source: Zippenfenig (2023), Hersbach et al. (2023), Muñoz Sabater (2019), 
 -   A large portion of the cost of holidaying in Japan is the plane ticket
 -   During the off-peak period, Hakuba in Japan is cheaper than Falls Creek in Victoria
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, out.width="100%"}
 costs <- read.csv("costs.csv")
 
 peak_costs <- costs %>% filter(Time == "Peak")
@@ -183,7 +187,6 @@ plot_ly() %>%
             type="bar", name=~Category, legendgroup=~Category, visible=FALSE) %>%
   layout(title=list(text="Total Cost of a One-Week Family Ski Vacation", 
                     y=0.975, yanchor="top"),
-         height=600,
          barmode="stack", updatemenus=updatemenus,
          xaxis=list(title="Ski resort"),
          yaxis=list(title="Cost (AUD)", zeroline=FALSE, range=c(0,15000))) %>%
@@ -201,7 +204,7 @@ Data source: Malcolm (2024)
 -   Growing foreigner population & tourism numbers encouraged development of English services and support
 -   Compared to Europe, requires less travel time and induces less jetlag (+/-1 hour)
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, out.width="100%"}
 populations <- read.csv("populations.csv")
 populations$prop <- (populations$Foreigners/populations$Total.population)*100
 
@@ -214,7 +217,7 @@ plot_ly() %>%
   add_trace(data=n_population, x=~Year, y=~prop, name="Niseko", type="scatter", 
             mode="lines+markers") %>%
   layout(title=list(text="Proportion of Foreigners Within the Population", 
-                    y=0.975, yanchor="top"),
+                    y=0.975, yanchor="top"), 
          legend=list(orientation="h", y=0.95, xanchor="center", x=0.5),
          xaxis=list(title="Population (%)",  range=c(1999,2021)),
          yaxis=list(title="Year", zeroline=FALSE, range=c(0,5.5))) %>%
