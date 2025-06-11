@@ -1,0 +1,267 @@
+---
+title: "Australia's Growing Love Affair with Japanese Snow"
+author: "Eunice Tse (s4111727)"
+format:
+  revealjs:
+    theme: simple
+    css: styles.css
+editor: visual
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(plotly)
+```
+
+-   I saw a social media post asking "What's the best ski resort in Australia?"
+
+-   Nearly every comment recommended Japanese resorts like Hakuba and Niseko...
+
+-   This sparked my curiosity, why are so many Australians favoring Japan's powder snow over their own local slopes?
+
+![](https://media.cnn.com/api/v1/images/stellar/prod/gettyimages-1246686978.jpg?c=original){fig-align="center" width="691"}
+
+::: {style="text-align: center; font-size: 60%;"}
+Photographer: Noriko Hayashi
+:::
+
+------------------------------------------------------------------------
+
+### A Rising Proportion of Australians Embracing Japan's Winter
+
+```{r, echo=FALSE}
+destinations <- read.csv("destinations_clean.csv")
+destinations$Month <- factor(destinations$Month,
+                             levels=c("Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                                      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"))
+plot_ly(destinations, x=~Month, y=~Japan_Ratio*100, frame=~Year,
+        type="bar", color=~Winter,
+        colors=c("Winter"="dodgerblue", "Other"="gray80")) %>%
+  layout(showlegend=FALSE,
+         title=list(text="Proportion of Outbound Australians Travelling to Japan"),
+         xaxis=list(title=list(text="Month"), zeroline=FALSE),
+         yaxis=list(title=list(text="Share of Outbound Australians (%)"),
+                    zeroline=FALSE)) %>%
+  animation_opts(frame=400, transition=100, redraw=TRUE, mode="immediate") 
+```
+
+::: {style="text-align: right; font-size: 60%;"}
+\*[Blue]{style="color: dodgerblue;"} bars represent Japan's snow season
+:::
+
+::: {style="font-size: 60%;"}
+Data source: Japan National Tourism Organization (2024)
+:::
+
+------------------------------------------------------------------------
+
+### 6x More Australians Ski Japan Than The Global Tourist Average
+
+```{r, echo=FALSE}
+reasons <- read.csv("reasons_clean.csv")
+reasons$Activity <- factor(reasons$Activity)
+plot_ly(reasons, x=~Activity, y=~All, type="bar", name="All countries",
+        marker=list(color="lightgray"), frame=~Year) %>%
+  add_trace(y=~Australia, name="Australia", marker=list(color="darkblue")) %>%
+  animation_opts(frame=600, transition=300, redraw=TRUE, mode="immediate")  %>%
+  animation_slider(currentvalue=list(prefix="Year: ", font=list(color="black")),
+                   pad=list(t=70))  %>%
+  animation_button(y=-0.35, yanchor="bottom") %>%
+  layout(title=list(text="Participation Rate of Activities by Foreigners in Japan",
+                    y=0.975, yanchor="top"),
+         yaxis=list(title="Participation Rate (%)", zeroline=FALSE,
+                    standoff=5, range=c(0,110)), barmode="group",
+         legend=list(orientation="h", y=0.95, xanchor="center", x=0.5),
+         xaxis=list(title="Activity", tickangle=-35)) %>%
+  add_annotations(x="Ski/snowboard", y=25, text="", arrowhead=2, arrowsize=1,
+                  arrowwidth=10, ax=0, ay=-150, arrowcolor="red") %>%
+  config(responsive=TRUE)
+```
+
+::: {style="font-size: 60%;"}
+Data source: Japan National Tourism Organization (2024)
+:::
+
+------------------------------------------------------------------------
+
+::: columns
+::: {.column width="60%" style="font-size:150%;"}
+### Main Factors
+
+<br>
+
+-   Snowpack conditions
+
+-   Cost factors
+
+-   Convenience
+:::
+
+::: {.column width="40%"}
+<br> ![](25918611_m.jpg){fig-align="right" width="400"}
+
+::: {style="text-align: center; font-size: 60%;"}
+Photographer: Yoshiki Ishikawa
+:::
+:::
+:::
+
+------------------------------------------------------------------------
+
+### Snowpack (depth of snow)
+
+-   A strong factor in mountain choice for skiers (Parthum & Christensen, 2022)
+-   Higher temperatures & less snowfall results in faster melting and less accumulation of the snowpack & a shorter ski season
+
+```{r, echo=FALSE, fig.align="center"}
+weather <- read.csv("weather_clean.csv") %>%
+  mutate(time=dmy(time)) %>%
+  filter(location %in% c("Mt. Buller", "Perisher", "Hakuba", "Niseko")) %>%
+  mutate(month=month(time),
+         hemisphere=ifelse(location %in% c("Hakuba", "Niseko"),
+                             "Northern", "Southern"),
+         in_snow_season=(hemisphere == "Southern" & month %in% 6:8) |
+         (hemisphere == "Northern" & month %in% c(12,1,2,3))) %>%
+  filter(in_snow_season) %>%
+  select(location, temperature, snowfall, hemisphere) %>%
+  rename("Temperature (°C)"=temperature, "Snowfall (cm)"=snowfall) %>%
+  pivot_longer(cols=c(`Temperature (°C)`, `Snowfall (cm)`),
+               names_to="variable", values_to="value")
+
+ggplot(weather, aes(x=location, y=value, fill=hemisphere)) +
+  geom_boxplot() + facet_grid(variable ~ ., scales="free_y", switch="y") + 
+  scale_fill_manual(values=c("Northern"=alpha("darkred",0.5),
+                             "Southern"=alpha("darkblue",0.5))) +
+  labs(title="Temperature and Snowfall by Location",
+       x="Ski Resort", y="") +
+  theme_bw() +
+  theme(legend.position="none", panel.grid.major.x=element_blank(),
+        strip.placement="outside", strip.background=element_blank())
+
+```
+
+::: {style="text-align: right; font-size: 60%;"}
+\*[Red]{style="color: #c07f7e;"} represents Japanese resorts, [blue]{style="color: #807fc7;"} represents Australian resorts
+:::
+
+::: {style="font-size: 60%;"}
+Data source: Zippenfenig (2023), Hersbach et al. (2023), Muñoz Sabater (2019), Schimanke et al. (2021)
+:::
+
+------------------------------------------------------------------------
+
+### Cost
+
+-   A large portion of the cost of holidaying in Japan is the plane ticket
+-   During the off-peak period, Hakuba in Japan is cheaper than Falls Creek in Victoria
+
+```{r, echo=FALSE}
+costs <- read.csv("costs.csv")
+
+peak_costs <- costs %>% filter(Time == "Peak")
+offpeak_costs <- costs %>% filter(Time == "Off-season")
+
+cat_peak <- length(unique(peak_costs$Category))
+cat_offpeak <- length(unique(offpeak_costs$Category))
+
+visible_peak <- c(rep(TRUE, cat_peak), rep(FALSE, cat_offpeak))
+visible_offpeak <- c(rep(FALSE, cat_peak), rep(TRUE, cat_offpeak))
+
+updatemenus <- list(
+  list(active=0, x=-0.125, type="buttons", buttons=list(
+    list(label="Peak", method="restyle",
+         args=list("visible", visible_peak)),
+    list(label="Off-season", method="restyle",
+         args=list("visible", visible_offpeak)))))
+
+palette <- c("#cf6530", "#F5A623", "#0160D6", "#1A385A", "#9cbad9") 
+
+plot_ly() %>%
+  add_trace(data=peak_costs, x=~Location, y=~Cost, color=~Category, colors=palette,
+            type="bar", name=~Category, legendgroup=~Category, visible=TRUE) %>%
+  add_trace(data=offpeak_costs, x=~Location, y=~Cost, color=~Category, colors=palette,
+            type="bar", name=~Category, legendgroup=~Category, visible=FALSE) %>%
+  layout(title=list(text="Total Cost of a One-Week Family Ski Vacation", 
+                    y=0.975, yanchor="top"),
+         height=600,
+         barmode="stack", updatemenus=updatemenus,
+         xaxis=list(title="Ski resort"),
+         yaxis=list(title="Cost (AUD)", zeroline=FALSE, range=c(0,15000))) %>%
+  config(responsive=TRUE)
+```
+
+::: {style="font-size: 60%;"}
+Data source: Malcolm (2024)
+:::
+
+------------------------------------------------------------------------
+
+### Convenience
+
+-   Growing foreigner population & tourism numbers encouraged development of English services and support
+-   Compared to Europe, requires less travel time and induces less jetlag (+/-1 hour)
+
+```{r, echo=FALSE}
+populations <- read.csv("populations.csv")
+populations$prop <- (populations$Foreigners/populations$Total.population)*100
+
+h_population <- populations %>% filter(Area=="Hakuba")
+n_population <- populations %>% filter(Area=="Niseko")
+  
+plot_ly() %>%
+  add_trace(data=h_population, x=~Year, y=~prop, name="Hakuba", type="scatter", 
+            mode="lines+markers") %>%
+  add_trace(data=n_population, x=~Year, y=~prop, name="Niseko", type="scatter", 
+            mode="lines+markers") %>%
+  layout(title=list(text="Proportion of Foreigners Within the Population", 
+                    y=0.975, yanchor="top"),
+         legend=list(orientation="h", y=0.95, xanchor="center", x=0.5),
+         xaxis=list(title="Population (%)",  range=c(1999,2021)),
+         yaxis=list(title="Year", zeroline=FALSE, range=c(0,5.5))) %>%
+  config(responsive=TRUE)
+```
+
+::: {style="font-size: 60%;"}
+Data source: National Statistics Center (2024)
+:::
+
+------------------------------------------------------------------------
+
+### Conclusions
+
+::: columns
+::: {.column width="50%"}
+-   Australians are increasingly traveling to Japan for the snow for multiple reasons
+-   Japan has more advantageous climate conditions that result in more reliable snow
+-   Cost of accommodation, lift tickets, food, rentals in Japan are consistently cheaper than in Australia
+-   Japan is a convenient travel destination with direct flights from major Australian cities to Tokyo, and efficient & reliable public transport options to the slopes
+:::
+
+::: {.column width="50%"}
+![](https://i.imgur.com/rFPaWnr.jpeg){fig-align="right" width="400"}
+:::
+:::
+
+------------------------------------------------------------------------
+
+### References
+
+::: hanging-indent
+Australian Bureau of Statistics (2025) *Overseas Arrivals and Departures, Australia* \[Data set\]. ABS. https://www.abs.gov.au/statistics/industry/tourism-and-transport/overseas-arrivals-and-departures-australia/latest-release
+
+Australian Ski Areas Association (2025) *Australian Skier Visitation Statistics ('000)* \[Data set\]. https://asaa.org.au/statistics/
+
+Hersbach, H., Bell, B., Berrisford, P., Biavati, G., Horányi, A., Muñoz Sabater, J., Nicolas, J., Peubey, C., Radu, R., Rozum, I., Schepers, D., Simmons, A., Soci, C., Dee, D., Thépaut, J-N. (2023). *ERA5 hourly data on single levels from 1940 to present* \[Data set\]. ECMWF. https://doi.org/10.24381/cds.adbb2d47
+
+Japan National Tourism Organization (2024). *Expectations regarding visit to Japan* \[Data set\]. Japan Tourism Statistics. https://statistics.jnto.go.jp/en/graph/#graph--expectations--regarding--visit--to--japan
+
+Malcolm (2024) *Comparing Costs of Skiing in Japan vs Australia*. Trail Voyage. https://trailvoyage.com/comparing-costs-of-skiing-in-japan-vs-australia/
+
+Muñoz Sabater, J. (2019). *ERA5-Land hourly data from 2001 to present* \[Data set\]. ECMWF. https://doi.org/10.24381/CDS.E2161BAC
+
+National Statistics Center (2024). *Regional Statistics Database (System of Social and Demographic Statistics)* \[Data set\]. e-Stat. https://www.e-stat.go.jp/en/regional-statistics/ssdsview
+
+Schimanke S., Ridal M., Le Moigne P., Berggren L., Undén P., Randriamampianina R., Andrea U., Bazile E., Bertelsen A., Brousseau P., Dahlgren P., Edvinsson L., El Said A., Glinton M., Hopsch S., Isaksson L., Mladek R., Olsson E., Verrelle A., Wang Z.Q. (2021). *CERRA sub-daily regional reanalysis data for Europe on single levels from 1984 to present* \[Data set\]. ECMWF. https://doi.org/10.24381/CDS.622A565A
+
+Zippenfenig, P. (2023). *Open-Meteo.com Weather API* \[Computer software\]. Zenodo. https://doi.org/10.5281/ZENODO.7970649
+:::

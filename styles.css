@@ -1,0 +1,11 @@
+.reveal section {
+  font-size: 0.7em;  
+}
+
+.hanging-indent {
+  font-size: 60%;
+  display: block;
+  margin-left: 4em;    
+  text-indent: -4em;   
+  white-space: normal; 
+}

@@ -1,0 +1,21 @@
+﻿Category,Location,Cost,Time
+Transport,Hakuba,6720,Peak
+Accomodation,Hakuba,3500,Peak
+Food,Hakuba,980,Peak
+Lift tickets,Hakuba,1260,Peak
+Gear hire,Hakuba,966,Peak
+Transport,Hakuba,4450,Off-season
+Accomodation,Hakuba,2000,Off-season
+Food,Hakuba,980,Off-season
+Lift tickets,Hakuba,838,Off-season
+Gear hire,Hakuba,966,Off-season
+Transport,Falls Creek,548,Peak
+Accomodation,Falls Creek,5999,Peak
+Food,Falls Creek,1960,Peak
+Lift tickets,Falls Creek,2032,Peak
+Gear hire,Falls Creek,942,Peak
+Transport,Falls Creek,548,Off-season
+Accomodation,Falls Creek,3870,Off-season
+Food,Falls Creek,1960,Off-season
+Lift tickets,Falls Creek,2032,Off-season
+Gear hire,Falls Creek,942,Off-season
